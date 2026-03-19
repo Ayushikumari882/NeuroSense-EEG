@@ -392,7 +392,8 @@ def main():
 
     if synth_btn:
         st.info("Synthetic data generation is a placeholder for future GAN integration.")
-        # TODO: Replace placeholder with GAN-based synthetic data generator.
+        # TODO: Replace placeholder with GAN-based synthetic data generator (e.g.,
+        # conditional GAN producing balanced CSP feature vectors / epochs).
 
     sample_epoch = None
     ch_names = []

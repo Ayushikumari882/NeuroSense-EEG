@@ -89,6 +89,7 @@ def train_classifier(X: np.ndarray, y: np.ndarray, test_size: float = 0.2):
         y_train,
         cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
     )
+    cv_std = cv_scores.std()
 
     pipeline = build_classifier()
     pipeline.fit(X_train, y_train)
@@ -97,7 +98,10 @@ def train_classifier(X: np.ndarray, y: np.ndarray, test_size: float = 0.2):
     accuracy = accuracy_score(y_test, y_pred)
     cm = confusion_matrix(y_test, y_pred)
 
-    print(f"[Classifier] Cross-validation score: {cv_scores.mean() * 100:.1f}%")
+    print(
+        f"[Classifier] Cross-validation score: "
+        f"{cv_scores.mean() * 100:.1f}% ± {cv_std * 100:.1f}%"
+    )
     print(f"[Classifier] Test accuracy: {accuracy * 100:.1f}%")
     print(f"[Classifier] Confusion matrix:\n{cm}")
 
