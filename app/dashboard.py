@@ -398,9 +398,10 @@ def main():
         # conditional GAN producing balanced CSP feature vectors / epochs). The
         # button should generate synthetic epochs, append to session_state['epochs']
         # (with updated metadata), and refresh plots/metrics. Acceptance: produces
-        # balanced left/right synthetic epochs (counts within ±5%), updates
-        # session_state pipelines/metrics (accuracy, cv_score, cm, prediction),
-        # and refreshes downstream visualisations.
+        # balanced left/right synthetic epochs (counts within ±5%), preserves
+        # channel names/sfreq/event codes, updates session_state pipelines/metrics
+        # (accuracy, cv_score, cm, prediction), and refreshes downstream
+        # visualisations.
 
     sample_epoch = None
     ch_names = []
@@ -492,33 +493,34 @@ def main():
 
     # ── Final result ──────────────────────────────────────────────────────────
     st.markdown("### 🏁 Final Result")
-    if st.session_state["prediction"] is not None:
-        pred = st.session_state["prediction"]
-        if st.session_state["accuracy"] is not None and st.session_state["cv_score"] is not None:
-            st.markdown(
-                f"""
-                <div class="eeg-card">
-                    <p style="margin:0; color:#8b949e; font-size:0.9rem;">
-                        Predicted Class</p>
-                    <p style="margin:0.2rem 0 0.4rem; font-size:1.6rem;
-                              font-weight:700; color:#61dafb;">
-                        {pred['class_label']} Movement</p>
-                    <p style="margin:0; color:#8b949e; font-size:0.9rem;">
-                        Confidence Score</p>
-                    <p style="margin:0.2rem 0 0.4rem; font-size:1.4rem;
-                              font-weight:600; color:#8ab4ff;">
-                        {pred['confidence'] * 100:.1f}%</p>
-                    <p style="margin:0; color:#8b949e; font-size:0.9rem;">
-                        Accuracy · Cross-validation</p>
-                    <p style="margin:0.2rem 0 0; font-size:1.2rem;
-                              font-weight:600; color:#8ab4ff;">
-                        {st.session_state['accuracy'] * 100:.1f}% · {st.session_state['cv_score'] * 100:.1f}%</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        else:
-            st.info("Classification metrics unavailable; rerun classification.")
+    pred = st.session_state["prediction"]
+    acc = st.session_state["accuracy"]
+    cv = st.session_state["cv_score"]
+    if pred is not None and acc is not None and cv is not None:
+        st.markdown(
+            f"""
+            <div class="eeg-card">
+                <p style="margin:0; color:#8b949e; font-size:0.9rem;">
+                    Predicted Class</p>
+                <p style="margin:0.2rem 0 0.4rem; font-size:1.6rem;
+                          font-weight:700; color:#61dafb;">
+                    {pred['class_label']} Movement</p>
+                <p style="margin:0; color:#8b949e; font-size:0.9rem;">
+                    Confidence Score</p>
+                <p style="margin:0.2rem 0 0.4rem; font-size:1.4rem;
+                          font-weight:600; color:#8ab4ff;">
+                    {pred['confidence'] * 100:.1f}%</p>
+                <p style="margin:0; color:#8b949e; font-size:0.9rem;">
+                    Accuracy · Cross-validation</p>
+                <p style="margin:0.2rem 0 0; font-size:1.2rem;
+                          font-weight:600; color:#8ab4ff;">
+                    {acc * 100:.1f}% · {cv * 100:.1f}%</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    elif pred is not None:
+        st.info("Classification metrics unavailable; rerun classification.")
     else:
         st.info("Results will appear here after running classification.")
 

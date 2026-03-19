@@ -96,14 +96,13 @@ def train_classifier(X: np.ndarray, y: np.ndarray, test_size: float = 0.2):
         X, y, test_size=test_size, stratify=y, random_state=42
     )
 
+    pipeline = build_classifier()
     cv_scores = cross_val_score(
-        build_classifier(),
+        pipeline,
         X_train,
         y_train,
         cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
     )
-
-    pipeline = build_classifier()
     pipeline.fit(X_train, y_train)
 
     y_pred = pipeline.predict(X_test)
