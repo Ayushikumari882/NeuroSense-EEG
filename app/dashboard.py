@@ -262,7 +262,7 @@ def main():
     # ── Sidebar controls ──────────────────────────────────────────────────────
     with st.sidebar:
         st.markdown("## 🎛️ Controls")
-        st.caption("T1 → Left Hand · T2 → Right Hand")
+        st.caption("T1/T2 are PhysioNet cue codes: T1 → Left Hand, T2 → Right Hand")
         subject_id = st.number_input(
             "PhysioNet Subject ID",
             min_value=1,
@@ -392,6 +392,7 @@ def main():
 
     if synth_btn:
         st.info("Synthetic data generation is a placeholder for future GAN integration.")
+        # TODO: Replace placeholder with GAN-based synthetic data generator.
 
     sample_epoch = None
     ch_names = []
