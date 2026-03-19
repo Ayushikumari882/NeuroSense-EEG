@@ -11,15 +11,31 @@ Pipeline:
 """
 
 import numpy as np
+from typing import NamedTuple
+
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.calibration import CalibratedClassifierCV
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.model_selection import (
+    cross_val_score,
+    train_test_split,
+    StratifiedKFold,
+)
 from sklearn.metrics import accuracy_score, confusion_matrix
 
 # ── Label names for display ───────────────────────────────────────────────────
 CLASS_NAMES = ["Left Hand", "Right Hand"]
+
+
+class TrainResult(NamedTuple):
+    pipeline: Pipeline
+    accuracy: float
+    cm: np.ndarray
+    X_test: np.ndarray
+    y_test: np.ndarray
+    y_pred: np.ndarray
+    cv_score: float
 
 
 def build_classifier() -> Pipeline:
@@ -73,22 +89,42 @@ def train_classifier(X: np.ndarray, y: np.ndarray, test_size: float = 0.2):
     X_test : np.ndarray
     y_test : np.ndarray
     y_pred : np.ndarray
+    cv_score : float
+        Mean cross-validation score on the training split.
     """
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, stratify=y, random_state=42
     )
 
     pipeline = build_classifier()
+    cv_scores = cross_val_score(
+        pipeline,
+        X_train,
+        y_train,
+        cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
+    )
     pipeline.fit(X_train, y_train)
 
     y_pred = pipeline.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     cm = confusion_matrix(y_test, y_pred)
 
+    print(
+        f"[Classifier] Cross-validation score: "
+        f"{cv_scores.mean() * 100:.1f}% ± {cv_scores.std() * 100:.1f}%"
+    )
     print(f"[Classifier] Test accuracy: {accuracy * 100:.1f}%")
     print(f"[Classifier] Confusion matrix:\n{cm}")
 
-    return pipeline, accuracy, cm, X_test, y_test, y_pred
+    return TrainResult(
+        pipeline=pipeline,
+        accuracy=accuracy,
+        cm=cm,
+        X_test=X_test,
+        y_test=y_test,
+        y_pred=y_pred,
+        cv_score=float(cv_scores.mean()),
+    )
 
 
 def predict_single(pipeline, X_single: np.ndarray) -> dict:

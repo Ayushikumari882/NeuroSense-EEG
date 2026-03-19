@@ -34,7 +34,7 @@ pip install -r requirements.txt
 ### 2 – Launch the dashboard
 
 ```bash
-streamlit run app/dashboard.py
+python -m streamlit run app/dashboard.py
 ```
 
 Open the URL shown in your terminal (usually `http://localhost:8501`).
@@ -43,9 +43,10 @@ Open the URL shown in your terminal (usually `http://localhost:8501`).
 
 | Step | Action |
 |------|--------|
-| 1 | Select a **PhysioNet Subject ID** (1–109) in the sidebar |
-| 2 | Click **📂 Upload / Load Dataset** – downloads and preprocesses the EEG data |
-| 3 | Click **▶️ Run Classification** – extracts CSP features, trains SVM, shows results |
+| 1 | Select a **PhysioNet Subject ID** (1–109) or upload an **EDF file** |
+| 2 | Click **📥 Download & Load Dataset** (or upload) to preprocess the EEG |
+| 3 | Click **▶️ Run Classification** to extract CSP features and train the SVM |
+| 4 | Review the **EEG monitor**, **spectrogram**, **band power**, and **confusion matrix** |
 
 **Expected output:**
 
@@ -54,6 +55,7 @@ Dataset Uploaded Successfully
 Predicted Motor Imagery Class: Right Hand Movement
 Confidence Score: 91%
 Model Accuracy: 88%
+Cross-validation: 86%
 ```
 
 ---
@@ -80,15 +82,15 @@ PhysioNet EEGBCI
  classifier.py
   • StandardScaler + RBF SVM
   • Platt scaling (CalibratedClassifierCV) for confidence scores
-  • 80/20 train/test split
-  • Reports accuracy + confusion matrix
+  • 80/20 train/test split + 5-fold cross-validation
+  • Reports accuracy, calibrated probabilities, confusion matrix
       │
       ▼
  dashboard.py  (Streamlit)
   • Multi-channel EEG monitor plot
-  • Predicted class + confidence gauge
-  • Model accuracy metric
-  • Confusion matrix heatmap
+  • Predicted class + confidence gauge + CV metric
+  • Spectrogram (mu/beta highlight) and band power
+  • Confusion matrix heatmap + final results summary
 ```
 
 ---
