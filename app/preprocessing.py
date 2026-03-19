@@ -118,6 +118,25 @@ def remove_artifacts(raw: mne.io.Raw, n_components: int = 20) -> mne.io.Raw:
     return raw_clean
 
 
+def preprocess_raw(raw: mne.io.Raw) -> mne.Epochs:
+    """
+    Apply the full preprocessing chain to an already-loaded Raw object.
+    """
+    print("[Preprocessing] Applying band-pass filter (8–30 Hz) …")
+    raw = apply_bandpass_filter(raw)
+
+    print("[Preprocessing] Running ICA artefact removal …")
+    raw = remove_artifacts(raw)
+
+    print("[Preprocessing] Segmenting into epochs …")
+    epochs = create_epochs(raw)
+
+    print(f"[Preprocessing] Done – {len(epochs)} epochs retained "
+          f"({epochs['T1'].events.shape[0]} left, "
+          f"{epochs['T2'].events.shape[0]} right).")
+    return epochs
+
+
 def create_epochs(raw: mne.io.Raw) -> mne.Epochs:
     """
     Extract motor-imagery epochs from the cleaned raw recording.
@@ -161,22 +180,10 @@ def run_preprocessing(subject: int = 1) -> mne.Epochs:
 
     Returns
     -------
-    epochs : mne.Epochs
+        epochs : mne.Epochs
         Ready-to-use labelled epochs.
     """
     print(f"[Preprocessing] Loading subject {subject} …")
     raw = load_raw_data(subject)
 
-    print("[Preprocessing] Applying band-pass filter (8–30 Hz) …")
-    raw = apply_bandpass_filter(raw)
-
-    print("[Preprocessing] Running ICA artefact removal …")
-    raw = remove_artifacts(raw)
-
-    print("[Preprocessing] Segmenting into epochs …")
-    epochs = create_epochs(raw)
-
-    print(f"[Preprocessing] Done – {len(epochs)} epochs retained "
-          f"({epochs['T1'].events.shape[0]} left, "
-          f"{epochs['T2'].events.shape[0]} right).")
-    return epochs
+    return preprocess_raw(raw)

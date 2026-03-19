@@ -15,7 +15,11 @@ from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.calibration import CalibratedClassifierCV
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.model_selection import (
+    cross_val_score,
+    train_test_split,
+    StratifiedKFold,
+)
 from sklearn.metrics import accuracy_score, confusion_matrix
 
 # ── Label names for display ───────────────────────────────────────────────────
@@ -73,9 +77,17 @@ def train_classifier(X: np.ndarray, y: np.ndarray, test_size: float = 0.2):
     X_test : np.ndarray
     y_test : np.ndarray
     y_pred : np.ndarray
+    cv_score : float
     """
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, stratify=y, random_state=42
+    )
+
+    cv_scores = cross_val_score(
+        build_classifier(),
+        X,
+        y,
+        cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
     )
 
     pipeline = build_classifier()
@@ -85,10 +97,11 @@ def train_classifier(X: np.ndarray, y: np.ndarray, test_size: float = 0.2):
     accuracy = accuracy_score(y_test, y_pred)
     cm = confusion_matrix(y_test, y_pred)
 
+    print(f"[Classifier] Cross-validation score: {cv_scores.mean() * 100:.1f}%")
     print(f"[Classifier] Test accuracy: {accuracy * 100:.1f}%")
     print(f"[Classifier] Confusion matrix:\n{cm}")
 
-    return pipeline, accuracy, cm, X_test, y_test, y_pred
+    return pipeline, accuracy, cm, X_test, y_test, y_pred, float(cv_scores.mean())
 
 
 def predict_single(pipeline, X_single: np.ndarray) -> dict:
