@@ -262,7 +262,10 @@ def main():
     # ── Sidebar controls ──────────────────────────────────────────────────────
     with st.sidebar:
         st.markdown("## 🎛️ Controls")
-        st.caption("T1/T2 are PhysioNet cue codes: T1 → Left Hand, T2 → Right Hand")
+        if st.session_state["dataset_source"] == "PhysioNet":
+            st.caption("T1/T2 cue codes: T1 → Left Hand, T2 → Right Hand")
+        else:
+            st.caption("EEG cue labels depend on the uploaded file (PhysioNet uses T1/T2).")
         subject_id = st.number_input(
             "PhysioNet Subject ID",
             min_value=1,
@@ -393,7 +396,9 @@ def main():
     if synth_btn:
         st.info("Synthetic data generation is a placeholder for future GAN integration.")
         # TODO: Replace placeholder with GAN-based synthetic data generator (e.g.,
-        # conditional GAN producing balanced CSP feature vectors / epochs).
+        # conditional GAN producing balanced CSP feature vectors / epochs). The
+        # button should generate synthetic epochs, append to session_state['epochs']
+        # (with updated metadata), and refresh plots/metrics.
 
     sample_epoch = None
     ch_names = []
