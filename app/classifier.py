@@ -11,6 +11,8 @@ Pipeline:
 """
 
 import numpy as np
+from typing import NamedTuple
+
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -24,6 +26,16 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 
 # ── Label names for display ───────────────────────────────────────────────────
 CLASS_NAMES = ["Left Hand", "Right Hand"]
+
+
+class TrainResult(NamedTuple):
+    pipeline: Pipeline
+    accuracy: float
+    cm: np.ndarray
+    X_test: np.ndarray
+    y_test: np.ndarray
+    y_pred: np.ndarray
+    cv_score: float
 
 
 def build_classifier() -> Pipeline:
@@ -105,7 +117,15 @@ def train_classifier(X: np.ndarray, y: np.ndarray, test_size: float = 0.2):
     print(f"[Classifier] Test accuracy: {accuracy * 100:.1f}%")
     print(f"[Classifier] Confusion matrix:\n{cm}")
 
-    return pipeline, accuracy, cm, X_test, y_test, y_pred, float(cv_scores.mean())
+    return TrainResult(
+        pipeline=pipeline,
+        accuracy=accuracy,
+        cm=cm,
+        X_test=X_test,
+        y_test=y_test,
+        y_pred=y_pred,
+        cv_score=float(cv_scores.mean()),
+    )
 
 
 def predict_single(pipeline, X_single: np.ndarray) -> dict:

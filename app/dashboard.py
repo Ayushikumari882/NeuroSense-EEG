@@ -376,18 +376,17 @@ def main():
 
                     epochs = st.session_state["epochs"]
                     X, y, csp = extract_features(epochs)
-                    pipeline, accuracy, cm, X_test, y_test, y_pred, cv_score = \
-                        train_classifier(X, y)
+                    result = train_classifier(X, y)
 
                     st.session_state["csp"] = csp
-                    st.session_state["pipeline"] = pipeline
-                    st.session_state["accuracy"] = accuracy
-                    st.session_state["cv_score"] = cv_score
-                    st.session_state["cm"] = cm
+                    st.session_state["pipeline"] = result.pipeline
+                    st.session_state["accuracy"] = result.accuracy
+                    st.session_state["cv_score"] = result.cv_score
+                    st.session_state["cm"] = result.cm
 
                     # Predict the last test epoch as a demo
-                    result = predict_single(pipeline, X_test[-1])
-                    st.session_state["prediction"] = result
+                    single_pred = predict_single(result.pipeline, result.X_test[-1])
+                    st.session_state["prediction"] = single_pred
 
                     st.success("✅ Classification complete!")
                 except Exception as exc:
@@ -399,7 +398,9 @@ def main():
         # conditional GAN producing balanced CSP feature vectors / epochs). The
         # button should generate synthetic epochs, append to session_state['epochs']
         # (with updated metadata), and refresh plots/metrics. Acceptance: produces
-        # balanced left/right synthetic epochs and refreshes classification outputs.
+        # balanced left/right synthetic epochs (counts within ±5%), updates
+        # session_state pipelines/metrics (accuracy, cv_score, cm, prediction),
+        # and refreshes downstream visualisations.
 
     sample_epoch = None
     ch_names = []
@@ -493,28 +494,31 @@ def main():
     st.markdown("### 🏁 Final Result")
     if st.session_state["prediction"] is not None:
         pred = st.session_state["prediction"]
-        st.markdown(
-            f"""
-            <div class="eeg-card">
-                <p style="margin:0; color:#8b949e; font-size:0.9rem;">
-                    Predicted Class</p>
-                <p style="margin:0.2rem 0 0.4rem; font-size:1.6rem;
-                          font-weight:700; color:#61dafb;">
-                    {pred['class_label']} Movement</p>
-                <p style="margin:0; color:#8b949e; font-size:0.9rem;">
-                    Confidence Score</p>
-                <p style="margin:0.2rem 0 0.4rem; font-size:1.4rem;
-                          font-weight:600; color:#8ab4ff;">
-                    {pred['confidence'] * 100:.1f}%</p>
-                <p style="margin:0; color:#8b949e; font-size:0.9rem;">
-                    Accuracy · Cross-validation</p>
-                <p style="margin:0.2rem 0 0; font-size:1.2rem;
-                          font-weight:600; color:#8ab4ff;">
-                    {st.session_state['accuracy'] * 100:.1f}% · {st.session_state['cv_score'] * 100:.1f}%</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        if st.session_state["accuracy"] is not None and st.session_state["cv_score"] is not None:
+            st.markdown(
+                f"""
+                <div class="eeg-card">
+                    <p style="margin:0; color:#8b949e; font-size:0.9rem;">
+                        Predicted Class</p>
+                    <p style="margin:0.2rem 0 0.4rem; font-size:1.6rem;
+                              font-weight:700; color:#61dafb;">
+                        {pred['class_label']} Movement</p>
+                    <p style="margin:0; color:#8b949e; font-size:0.9rem;">
+                        Confidence Score</p>
+                    <p style="margin:0.2rem 0 0.4rem; font-size:1.4rem;
+                              font-weight:600; color:#8ab4ff;">
+                        {pred['confidence'] * 100:.1f}%</p>
+                    <p style="margin:0; color:#8b949e; font-size:0.9rem;">
+                        Accuracy · Cross-validation</p>
+                    <p style="margin:0.2rem 0 0; font-size:1.2rem;
+                              font-weight:600; color:#8ab4ff;">
+                        {st.session_state['accuracy'] * 100:.1f}% · {st.session_state['cv_score'] * 100:.1f}%</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.info("Classification metrics unavailable; rerun classification.")
     else:
         st.info("Results will appear here after running classification.")
 
