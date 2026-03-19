@@ -395,15 +395,9 @@ def main():
 
     if synth_btn:
         st.info("Synthetic data generation is a placeholder for future GAN integration.")
-        # TODO: Replace placeholder with GAN-based synthetic data generator (e.g.,
-        # conditional GAN producing balanced CSP feature vectors / epochs). The
-        # button should generate synthetic epochs, append to session_state['epochs']
-        # (with updated metadata), and refresh plots/metrics. Acceptance: produces
-        # balanced left/right synthetic epochs (counts within ±5%), preserves
-        # channel names/sfreq/event codes, updates session_state pipelines/metrics
-        # (accuracy, cv_score, cm, prediction), and refreshes downstream
-        # visualisations. Synthetic data should maintain mean/variance and
-        # spectral profiles comparable to real epochs.
+        # TODO: Implement GAN-based synthetic data generator (see GAN design doc):
+        # balanced left/right synthetic epochs (±5%), preserve metadata (channels,
+        # sfreq, event codes), maintain real-like statistics, and refresh metrics.
 
     sample_epoch = None
     ch_names = []

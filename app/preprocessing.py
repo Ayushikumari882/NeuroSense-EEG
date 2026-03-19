@@ -180,7 +180,7 @@ def run_preprocessing(subject: int = 1) -> mne.Epochs:
 
     Returns
     -------
-        epochs : mne.Epochs
+    epochs : mne.Epochs
         Ready-to-use labelled epochs.
     """
     print(f"[Preprocessing] Loading subject {subject} …")
