@@ -77,7 +77,8 @@ def train_classifier(X: np.ndarray, y: np.ndarray, test_size: float = 0.2):
     X_test : np.ndarray
     y_test : np.ndarray
     y_pred : np.ndarray
-    cv_score : float  (mean cross-validation score on training split)
+    cv_score : float
+        Mean cross-validation score on the training split.
     """
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, stratify=y, random_state=42

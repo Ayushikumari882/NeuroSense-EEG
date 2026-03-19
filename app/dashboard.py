@@ -398,7 +398,8 @@ def main():
         # TODO: Replace placeholder with GAN-based synthetic data generator (e.g.,
         # conditional GAN producing balanced CSP feature vectors / epochs). The
         # button should generate synthetic epochs, append to session_state['epochs']
-        # (with updated metadata), and refresh plots/metrics.
+        # (with updated metadata), and refresh plots/metrics. Acceptance: produces
+        # balanced left/right synthetic epochs and refreshes classification outputs.
 
     sample_epoch = None
     ch_names = []
