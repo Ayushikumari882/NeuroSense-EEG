@@ -22,8 +22,6 @@ matplotlib.use("Agg")   # non-interactive backend for Streamlit
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
-from mne.io import read_raw_edf
-from mne.time_frequency import psd_array_welch
 
 # ── Page configuration ────────────────────────────────────────────────────────
 st.set_page_config(
@@ -163,6 +161,8 @@ def _spectrogram_figure(signal: np.ndarray, sfreq: float, ch_label: str):
 
 def _bandpower_figure(epoch: np.ndarray, sfreq: float):
     """Return band-power bars for mu (8–13) and beta (13–30) bands."""
+    from mne.time_frequency import psd_array_welch
+
     psd, freqs = psd_array_welch(
         epoch,
         sfreq=sfreq,
@@ -340,6 +340,7 @@ def main():
         with st.spinner("Processing uploaded EDF file …"):
             try:
                 from app.preprocessing import preprocess_raw
+                from mne.io import read_raw_edf
 
                 raw = read_raw_edf(
                     io.BytesIO(uploaded_file.getvalue()),
@@ -401,7 +402,8 @@ def main():
         # balanced left/right synthetic epochs (counts within ±5%), preserves
         # channel names/sfreq/event codes, updates session_state pipelines/metrics
         # (accuracy, cv_score, cm, prediction), and refreshes downstream
-        # visualisations.
+        # visualisations. Synthetic data should maintain mean/variance and
+        # spectral profiles comparable to real epochs.
 
     sample_epoch = None
     ch_names = []
