@@ -187,3 +187,30 @@ def run_preprocessing(subject: int = 1) -> mne.Epochs:
     raw = load_raw_data(subject)
 
     return preprocess_raw(raw)
+
+
+def epochs_to_xy(epochs: mne.Epochs) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Convert labelled epochs into model-ready inputs.
+
+    Returns
+    -------
+    X : np.ndarray
+        EEG epoch tensor with shape (n_epochs, n_channels, n_times).
+    y : np.ndarray
+        Binary labels where 0 = Left Hand (T1), 1 = Right Hand (T2).
+    """
+    X = epochs.get_data()
+    inv_event = {v: k for k, v in epochs.event_id.items()}
+    label_map = {"T1": 0, "T2": 1}
+    y = np.array([label_map[inv_event[code]] for code in epochs.events[:, 2]], dtype=int)
+    return X, y
+
+
+def load_preprocessed_xy(subject: int = 1) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Convenience API required by the project specification:
+    load PhysioNet, preprocess EEG, and return X/y.
+    """
+    epochs = run_preprocessing(subject)
+    return epochs_to_xy(epochs)
