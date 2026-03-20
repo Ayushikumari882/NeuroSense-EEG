@@ -187,3 +187,54 @@ def run_preprocessing(subject: int = 1) -> mne.Epochs:
     raw = load_raw_data(subject)
 
     return preprocess_raw(raw)
+
+
+def epochs_to_xy(epochs: mne.Epochs) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Convert labelled epochs into model-ready inputs.
+
+    Returns
+    -------
+    X : np.ndarray
+        EEG epoch tensor with shape (n_epochs, n_channels, n_times).
+    y : np.ndarray
+        Binary labels where 0 = Left Hand (T1), 1 = Right Hand (T2).
+    """
+    if not {"T1", "T2"}.issubset(set(epochs.event_id)):
+        raise ValueError(
+            "Expected epochs to include T1 and T2 event labels for motor imagery."
+        )
+
+    selected_epochs = epochs[["T1", "T2"]]
+    if len(selected_epochs) == 0:
+        raise ValueError("No T1/T2 motor-imagery epochs available after preprocessing.")
+
+    X = selected_epochs.get_data()
+    inv_event = {v: k for k, v in selected_epochs.event_id.items()}
+    label_map = {"T1": 0, "T2": 1}
+    labels = []
+    for code in selected_epochs.events[:, 2]:
+        event_name = inv_event.get(code)
+        if event_name not in label_map:
+            raise ValueError(
+                f"Unexpected event code {code} found in selected motor-imagery epochs."
+            )
+        labels.append(label_map[event_name])
+    y = np.array(labels, dtype=int)
+    return X, y
+
+
+def load_preprocessed_xy(subject: int = 1) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Convenience API required by the project specification:
+    load PhysioNet, preprocess EEG, and return X/y.
+
+    Returns
+    -------
+    X : np.ndarray
+        EEG epoch tensor with shape (n_epochs, n_channels, n_times).
+    y : np.ndarray
+        Binary labels where 0 = Left Hand (T1), 1 = Right Hand (T2).
+    """
+    epochs = run_preprocessing(subject)
+    return epochs_to_xy(epochs)
